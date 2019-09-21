@@ -5,11 +5,9 @@ import math as math
 #建立正弦函数数据集
 def create_data(begin, end, size):
     X = np.arange(begin, end, (end-begin)/size)
-    rand = (np.random.randn(1, 10)*0.1)
+    rand = (np.random.randn(1, size)*0.1)
     Y = np.sin(2*math.pi*X)+rand
-    mat_X = X.T
-    mat_Y = Y.T
-    data = np.column_stack((mat_X, mat_Y))
+    data = np.column_stack((X.T, Y.T))
     return data
 
 #建立多项式拟合中X矩阵
@@ -39,19 +37,36 @@ def gradient_descent(X, T, learning_rate,lamda):
      return W
 
 #共轭梯度法
+def conjugate_gradient(X, T, lamda):
+    W = np.zeros(X.shape[0]).T
+    Q = np.dot(X.T, X) + lamda * W
+    r = -(np.dot(X.T, np.subtract(np.dot(X, W), T))+lamda*W)
+    p = r
+    for k in range(X.shape[0]+1):
+        α = np.dot(r.T, r)/np.dot(np.dot(p.T, Q), p)
+        W = np.add(W, np.dot(α, p))
+        old_r = r
+        r = r - np.dot(np.dot(α, Q), p)
+        β = np.dot(r.T, r)/np.dot(old_r.T, old_r)
+        p = r +np.dot(β, p)
+        k = k+1
+    return W
 
 #画图
 def draw(w,data):
+    print(type(w))
+    print(w.shape)
+    print(np.array(w)[0])
     p = np.poly1d(np.array(w.T)[::-1])
     x = np.linspace(0, 0.9, 1000)
     y = p(x)
     plt.plot(x, y)
-    plt.plot(data[:, 0].T, data[:, 1].T,"ro")
+    plt.plot(data[:, 0].T, data[:, 1].T, "ro")
     plt.show()
 
 
 if __name__ == '__main__':
     data = create_data(0, 1, 10)
     X = create_x(9, data[:, 0])
-    w = gradient_descent(X, data[:, 1],0.01,0.0001)
+    w = conjugate_gradient(X, data[:, 1], 0.00001)
     draw(w, data)
