@@ -5,36 +5,58 @@ import math as math
 #建立逻辑回归的数据集（自己手动生成的数据集）
 def create_data():
     x = [[0, 0], [1, 0], [2, 1], [1.5, 1.5], [4.7, 2.1], [3.3, 2.9], [10.2, 11], [0, 1.1], [3, 5], [3.3, 4.5],
-         [6, 7.2], [13, 15]]
-    x = x+np.random.normal(size=(12, 2))*0.1
-    y = [[0], [0], [0], [0], [0], [0], [0], [1], [1], [1], [1], [1]]
+         [3, 7.2], [2, 15]]
+    #x = x+np.random.normal(size=(12, 2))*0.1
+    y = [[1], [1], [1], [1], [1], [1], [1], [0], [0], [0], [0], [0]]
     dataset = np.hstack((x, y))
+   # print(dataset)
     return dataset
+
+def sigmoid(x):
+    return 1/(1 + np.exp(-x))
 
 #损失函数，不带正则项
 def hloss(x, y, β):
-    m = np.size(x,0)
+    m = np.size(x, 0)
     loss = 0
-    for i in range(m-1):
-        loss =loss -y[i, 0]*math.log(1/(1+math.exp(-(np.dot(x[i],β.T)))), math.e)-\
-              (1-y[i,0])*math.log(1-(1+math.exp(-(np.dot(x[i],β.T)))))
-    return  loss
+    for i in range(m):
+        loss =loss -y[i, 0]*math.log(1/(1+math.exp(-(np.dot(x[i], β.T)))), math.e)-\
+              (1-y[i, 0])*math.log(1-1/(1+math.exp(-(np.dot(x[i], β.T)))), math.e)
+    return  loss/m
 
 #利用梯度下降法求参数
 def gradien_desent(x,y,learning_rate):
-    m = np.size(x,0)
-    x = np.hstack((np.arange(m).T, x))
-    print(x)
-    β = np.zeros(m)
+    #print(x)
+   # print(m)
+   # print(np.ones(m))
+    x = np.column_stack((np.ones(np.size(x, 0)).T, x))
+    n = np.size(x, 1)
+    m = np.size(x, 0)
+   # print(x)
+    β = np.mat(np.ones(n)).T
     old_loss = 0
-    loss = hloss(x, y, β)
+    loss = hloss(x, y, β.T)
     loss_diff = loss-old_loss
-    while(loss_diff<1e-6):
-        for j in range(m-1):
-            for i in range(m-1):
-                β[:, j] = β[:, j]-learning_rate*(1/m)*(1/(1+math.exp(-(np.dot(x[i],β.T))-y[i, 0])))*x[i, j]
+    while(math.fabs(loss_diff)>2e-4):
+        error = sigmoid(np.dot(x, β)) - y
+        β = β - learning_rate/m*np.dot(x.T, error)
         old_loss = loss
-        loss = hloss(x, y, β)
+        loss = hloss(x, y, β.T)
         loss_diff = loss-old_loss
+    return β
 
+#画图
+def draw(β, data, string):
+    x1 = np.linspace(0, 15, 10000)
+    x2 = (β[0, 0]+β[1, 0]*x1)/(-β[2, 0])
+    plt.plot(data[0:7, 0].T, data[0:7, 1].T, "ro")
+    plt.plot(data[7:12, 0].T, data[7:12, 1].T, "go")
+    plt.plot(x1, x2)
+    plt.show()
+
+
+if __name__ == '__main__':
+    data = create_data()
+    β = gradien_desent(data.T[np.arange(0, 2)].T, data.T[np.arange(2, 3)].T, 0.01)
+    draw(β, data, "hhh")
 
