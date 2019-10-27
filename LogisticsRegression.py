@@ -2,12 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math as math
 import pandas as pd
-from mpl_toolkits.mplot3d import Axes3D
 from sklearn.datasets.samples_generator import make_classification
+from mpl_toolkits.mplot3d import Axes3D
 
 #建立逻辑回归的数据集（自己手动生成的数据集）
 def create_data1():
-    x = [[0, 0], [1, 0], [2, 1], [1.5, 1.5], [4.7, 2.1], [3.3, 2.9], [10.2, 11], [0, 1.1], [3, 5], [3.3, 4.5],
+    x = [[0, 0], [1, 0], [2, 1], [1.5, 1.5], [4.7, 2.1], [3.3, 2.9], [10.2, 11],
+         [0, 1.1], [3, 5], [3.3, 4.5],
          [3, 7.2], [2, 15]]
     x = x+np.random.normal(size=(12, 2))*0.1
     y = [[1], [1], [1], [1], [1], [1], [1], [0], [0], [0], [0], [0]]
@@ -23,10 +24,10 @@ def create_data2():
 #高斯分布的数据（利用协方差矩阵判断是否满足朴素贝叶斯）
 def create_data3():
     mean1 = [0, 0]
-    cov1 = [[1, 0], [0, 1]]
+    cov1 = [[1, 0.8], [0.8, 1]]
     data1 = np.random.multivariate_normal(mean1, cov1, 100)
     mean2 = [3, 3]
-    cov2 = [[1, 0], [0, 1]]
+    cov2 = [[1, 0.8], [0.8, 1]]
     data2 = np.random.multivariate_normal(mean2, cov2, 100)
     zero = np.mat(np.zeros(100)).T
     data1 = np.hstack((data1, zero))
@@ -48,7 +49,7 @@ def get_ucldata():
 def sigmoid(x):
     return 1/(1 + np.exp(-x))
 
-#损失函数，不带正则项
+#损失函数
 def hloss(x, y, W):
     m = np.size(x, 0)
     loss = -np.dot(y.T, np.log(sigmoid(np.dot(x, W.T)))+1e-5) + np.dot((1 - y).T, np.log(1 - sigmoid(np.dot(x, W.T))+1e-5))
@@ -67,7 +68,7 @@ def gradien_desent(x,y,learning_rate,regu = False):
     while(math.fabs(loss_diff)>1e-8):
         error = sigmoid(np.dot(x, W)) - y
         if(regu):
-            W = W - learning_rate / m * np.dot(x.T, error)-learning_rate*W*0.8
+            W = W - learning_rate / m * np.dot(x.T, error)-learning_rate*W*0.5
         else:
             W = W - learning_rate/m*np.dot(x.T, error)
         old_loss = loss
@@ -89,7 +90,9 @@ def judge(x,y,W):
     return result/m
 #画图(二维)
 def drawDomension2(W, data, string):
-    x1 = np.linspace(-5, 5, 10000)
+    plt.rcParams['font.sans-serif'] = ['SimHei']
+    plt.rcParams['axes.unicode_minus'] = False
+    x1 = np.linspace(-5, 10, 10000)
     x2 = (W[0, 0]+W[1, 0]*x1)/(-W[2, 0])
     for i in range(np.size(data,0)):
         if(data[i, 2]==0):
@@ -102,7 +105,6 @@ def drawDomension2(W, data, string):
 
 #画图（三维）
 def drawDimension3(W, data):
-  #  print(np.shape(data))
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     x1 = []
@@ -120,14 +122,16 @@ def drawDimension3(W, data):
             x2.append(data[i, 0])
             y2.append(data[i, 1])
             z2.append(data[i, 2])
-    ax.scatter(x1, y1, z1)
-    ax.scatter(x2, y2, z2)
+    colors1 = '#00CED1'  # 点的颜色
+    colors2 = '#DC143C'
+    ax.scatter(x1, y1, z1, c=colors1)
+    ax.scatter(x2, y2, z2,)
     plt.show()
 
 
 if __name__ == '__main__':
      data = create_data1()
-     W = gradien_desent(data.T[np.arange(0, 2)].T, data.T[np.arange(2, 3)].T, 0.001, False)
+     W = gradien_desent(data.T[np.arange(0, 2)].T, data.T[np.arange(2, 3)].T, 0.001)
      drawDomension2(W, data, "自己手动生成数据")
      print("自己手动生成数据的正确率(无正则化)")
      print(judge(np.column_stack((np.ones(np.size(data.T[np.arange(0, 2)].T, 0)).T,
@@ -149,7 +153,7 @@ if __name__ == '__main__':
      print(judge(np.column_stack((np.ones(np.size(data.T[np.arange(0, 2)].T, 0)).T,
                              data.T[np.arange(0, 2)].T)), data.T[np.arange(2, 3)].T, W))
      data = create_data3()
-     W = gradien_desent(data[0:80, 0:2], data[0:80, 2:3], 0.001, False)
+     W = gradien_desent(data[0:80, 0:2], data[0:80, 2:3], 0.001)
      print("两个独立的高斯分布生成的数据的正确率")
      print(judge(np.column_stack((np.ones(np.size(data[80:100, 0:2], 0)).T, data[80:100, 0:2])), data[80:100, 2:3], W))
      drawDomension2(W, data, "两个独立的高斯分布")
