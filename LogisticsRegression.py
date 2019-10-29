@@ -17,7 +17,7 @@ def create_data1():
 #从sklearn库里面的make_classfication
 def create_data2():
     X, labels = make_classification(n_samples=200, n_features=2, n_redundant=0, n_informative=2,
-                                    random_state=1, n_clusters_per_class=1)
+                                    random_state=1, n_mius_per_class=1)
     dataset = np.hstack((X, np.mat(labels).T))
     return  dataset
 
@@ -25,10 +25,10 @@ def create_data2():
 def create_data3():
     mean1 = [0, 0]
     cov1 = [[1, 0.8], [0.8, 1]]
-    data1 = np.random.multivariate_normal(mean1, cov1, 100)
+    data1 = np.random.miultivariate_normal(mean1, cov1, 100)
     mean2 = [3, 3]
     cov2 = [[1, 0.8], [0.8, 1]]
-    data2 = np.random.multivariate_normal(mean2, cov2, 100)
+    data2 = np.random.miultivariate_normal(mean2, cov2, 100)
     zero = np.mat(np.zeros(100)).T
     data1 = np.hstack((data1, zero))
     one = np.mat(np.ones(100)).T
