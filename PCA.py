@@ -1,5 +1,5 @@
 import numpy as np
-from numpy import linalg as LA
+import math
 import matplotlib.pyplot as plt
 from PIL import Image
 from mpl_toolkits.mplot3d import Axes3D
@@ -57,9 +57,12 @@ def pca(x, k):
     rec = np.dot(new_x, feature.T)+mean
     return rec
 
-def a():
-
-    return
+def psnr(img1, img2):
+   mse = np.mean((img1/255. - img2/255.) ** 2)
+   if mse < 1.0e-10:
+      return 100
+   PIXEL_MAX = 1
+   return 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
 
 def drawDimen3(X, w, v):
     fig = plt.figure()
@@ -92,13 +95,15 @@ if __name__ == '__main__':
         plt.subplot(2, 5, i+1)
         plt.imshow(data[i].reshape(30, 30))
     plt.show()
-    rec = pca(data, 5)
+    rec = pca(data, 1)
     for i in range(N):
         plt.subplot(2, 5, i+1)
         rec1 = rec[i, :]
         data1 = rec1.reshape(30, 30)
         plt.imshow(data1)
     plt.show()
+    for i in range(N):
+        print(psnr(data[i].reshape(30, 30), rec[i].reshape(30, 30)))
 
 
 
